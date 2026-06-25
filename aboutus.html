@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Капсула</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="java/js.js" defer></script>
+</head>
+
+<body>
+<div class="customcursor"></div>
+<section class="we">
+    <div class="bluebackground">
+    <div class="background-reel">
+        <div class="reel-container">
+        <div class="reel1">
+            <img src="images/photo1.png" alt="Фото 1">
+            <img src="images/photo2.png" alt="Фото 2">
+            <img src="images/photo3.png" alt="Фото 3">
+            <img src="images/photo4.png" alt="Фото 4">
+            <img src="images/photo1.png" alt="Фото 1">
+            <img src="images/photo2.png" alt="Фото 2">
+            <img src="images/photo3.png" alt="Фото 3">
+            <img src="images/photo4.png" alt="Фото 4">
+        </div>
+    </div>
+    <button class="events">события</button>
+    </div>
+    <div class="buttons-container">
+        <div>
+            <a href="aboutus.html" class="aboutus active">кто мы?</a>
+        </div>
+        <div>
+            <a href="index.html" class="events">события</a>
+        </div>
+        <div>
+            <a href="campaign.html" class="campaign">кампейн</a>
+        </div>
+        <div>
+            <a href="history.html" class="history">история</a>
+        </div>
+        <div>
+            <a href="shop.html" class="shop">магазин</a>
+        </div>
+        <div class="logowhite">
+            <img src="images/logowhite.svg">
+        </div>
+    </div>
+    <h1 class="showroom">Шоурум<br/>женской<br />одежды,</h1>
+    <p class="underline">меняющей<br />форму<br />и цвет</p>
+    <p class="mission">Наша миссия — открыть большие возможности<br />
+        для выражения индивидуальности через одежду<br />
+        и решить проблему перепотребления без ограничений</p>
+    <div>
+        <a href="shop.html"class="orderbtn">ЗАКАЗАТЬ<br />КАПСУЛУ</a>
+    </div>
+</section>
+<section class="work">
+    <h2 class="how">КАК ЭТО РАБОТАЕТ?</h2>
+    <div id="scene-container"></div>
+    <script type="importmap">
+          {
+            "imports": {
+              "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+              "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+          }
+        </script>
+    
+    <script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  let scene, camera, renderer, mixer, clock, controls;
+  const CONTAINER_ID = 'scene-container';
+
+  function init() {
+    // 1. Сцена и Камера
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xF0ECEA);
+
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(4, 0.36, 0);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 4.5);
+      dirLight.position.set(40, 100, 80);
+      dirLight.castShadow = true;
+      scene.add(dirLight);
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      keyLight.position.set(100, 150, 100);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.width = 2048;
+      keyLight.shadow.mapSize.height = 2048;
+      keyLight.shadow.radius = 2; // Размытие края тени для мягкости
+      scene.add(keyLight);
+
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+      fillLight.position.set(-100, 100, -50);
+      fillLight.castShadow = false;
+      scene.add(fillLight);
+
+      const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
+      rimLight.position.set(-100, 100, -50);
+      rimLight.castShadow = false;
+      scene.add(rimLight);
+
+    const container = document.getElementById(CONTAINER_ID);
+    if (!container) {
+      console.error(`❌ КРИТИЧЕСКАЯ ОШИБКА: Не найден элемент <div id="\${CONTAINER_ID}"></div> в HTML!`);
+      console.error('💡 Добавьте <div id="scene-container"></div> в ваш aboutus.html внутри нужной секции.');
+      return;
+    }
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableRotate = false;
+    controls.enableZoom = false;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    loadModel();
+
+    clock = new THREE.Clock();
+    animate();
+  }
+
+  function loadModel() {
+    const loader = new GLTFLoader();
+    const path = 'images/anim4.glb'; 
+
+    console.log(`📂 Загрузка модели: \${path}`);
+
+    loader.load(
+      path,
+      (gltf) => {
+        const root = gltf.scene;
+
+        const box = new THREE.Box3().setFromObject(root);
+        const center = box.getCenter(new THREE.Vector3());
+        root.position.sub(center);
+        
+        scene.add(root);
+
+        console.log('✅ Модель загружена. Всего анимаций:', gltf.animations ? gltf.animations.length : 0);
+
+        if (gltf.animations && gltf.animations.length > 0) {
+              console.log(`Найдено анимаций: \${gltf.animations.length}. Ищем валидную...`);
+
+              mixer = new THREE.AnimationMixer(gltf.scene);
+              let animationFound = false;
+
+              for (const clip of gltf.animations) {
+                  if (clip && clip.duration > 0 && clip.name && clip.name !== "") {
+                      console.log(`✅ Запускаем анимацию: "${clip.name}" (длительность: ${clip.duration} сек)`);
+
+                      const action = mixer.clipAction(clip);
+                      action.setLoop(THREE.LoopRepeat);
+                      action.play();
+
+                      animationFound = true;
+                      break;
+                  } else {
+                      console.warn(`⚠️ Пропускаем битую/пустую анимацию:`, clip);
+                  }
+              }
+
+              if (!animationFound) {
+                  console.error('❌ В файле нет валидных анимаций для запуска!');
+              }
+          }
+        }
+    );
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    if (mixer) {
+      const delta = clock.getDelta();
+      mixer.update(delta);
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  window.addEventListener('resize', () => {
+    const container = document.getElementById(CONTAINER_ID);
+    if (!container || !renderer) return;
+
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+
+  init();
+</script>
+
+<p class="step1">Помести<br/>
+    комбинезон<br />
+    в капсулу</p>
+<p class="step2">Загрузи<br />
+    желаемый образ<br />
+    в приложение<br />
+    «Капсула»</p>
+<p class="step3">Дождись<br />окончания<br />трансформации</p>
+<p class="step4">Примерь<br />получившийся<br />образ</p>
+<p class="number1">1</p>
+<p class="number2">2</p>
+<p class="number3">3</p>
+<p class="number4">4</p>
+</section>
+<section class="merch">
+    <h3 class="madeto">Made<br />to be<br />re-made</h3>
+    <h4 class="ourmerch">НАШ МЕРЧ</h4>
+    <p class="foryou">для тех, кто разделяет идею<br />осознанного потребления</p>
+    <div class="arc-container">
+    <div id="arcWrapper" class="arc-wrapper" style="--global-rotate: 0deg;" >
+        <div class="arc-item" style="--angle: -80deg;">
+            <div class="item-card">
+                <img src="images/hat.png" class="card-image">
+                <span class="card-title1">900₽</span>
+            </div>
+        </div>
+        <div class="arc-item" style="--angle: -40deg;">
+            <div class="item-card">
+                <img src="images/locket.png" class="card-image">
+                <span class="card-title2">600₽</span>
+            </div>
+        </div>
+        <div class="arc-item" style="--angle: 0deg;">
+            <div class="item-card">
+                <img src="images/cup.png" class="card-image">
+                <span class="card-title3">800₽</span>
+            </div>
+        </div>
+        <div class="arc-item" style="--angle: 55deg;">
+            <div class="item-card">
+                <img src="images/umbrella.png" class="card-image">
+                <span class="card-title4">1200₽</span>
+            </div>
+        </div>
+        <div class="arc-item" style="--angle: 105deg;">
+            <div class="item-card">
+                <img src="images/shopper.png" class="card-image">
+                <span class="card-title5">1000₽</span>
+            </div>
+        </div>
+        <div class="arc-item" style="--angle: 150deg;">
+            <div class="item-card">
+                <img src="images/hat.png" class="card-image">
+                <span class="card-title1">900₽</span>
+            </div>
+        </div>
+        <div class="arc-item" style="--angle: 190deg;">
+            <div class="item-card">
+                <img src="images/locket.png" class="card-image">
+                <span class="card-title2">600₽</span>
+            </div>
+        </div>
+        <div class="arc-item" style="--angle: 230deg;">
+            <div class="item-card">
+                <img src="images/cup.png" class="card-image">
+                <span class="card-title3">800₽</span>
+            </div>
+        </div>
+    </div>
+    </div>
+    <button id="buyTrigger" class="merchbtn">КУПИТЬ</button>
+    <div id="bluring" class="blur">
+        <div class="circle">
+    
+            <h8 class="formtitle">Заполните все поля<br/> для оформления заказа</h8>
+    
+            <form id="orderform">
+                <div class="input">
+                    <input type="text" id="name" placeholder="ИМЯ" required>
+                </div>
+                <div class="input">
+                    <input type="text" id="address" placeholder="АДРЕС" required>
+                </div>
+                <div class="input">
+                    <input type="tel" id="phone" placeholder="ТЕЛЕФОН" required>
+                </div>
+    
+                <button type="submit" class="submit-btn">КУПИТЬ</button>
+            </form>
+
+</section>
+<div class="footer">
+    <div class="logof">
+        <img src="images/logo.svg">
+    </div>
+    <div class="mail">
+        <p>capsuleevent@yandex.ru</p>
+    </div>
+    <div class="phone">
+        <p>+79412324211</p>
+    </div>
+    <div class="adress">
+        <p>г. Санкт-Петербург, ул. Миллионная, д.1</p>
+    </div>
+</div>
+<script src="java/duga.js" defer></script>
+</body>

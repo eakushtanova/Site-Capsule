@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <title>Капсула</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="java/js.js" defer></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #111;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="customcursor"></div>
+    <section class="store">
+        <div class="buttons-container">
+            <div>
+                <a href="aboutus.html" class="aboutus">кто мы?</a>
+            </div>
+            <div>
+                <a href="index.html" class="events">события</a>
+            </div>
+            <div>
+                <a href="campaign.html" class="campaign">кампейн</a>
+            </div>
+            <div>
+                <a href="history.html" class="history">история</a>
+            </div>
+            <div>
+                <a href="shop.html" class="shop active">магазин</a>
+            </div>
+            <div class="logowhite">
+                <img src="images/logowhite.svg">
+            </div>
+        </div>
+    <div id="canvas-container"></div>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+    <script type="module">
+        import * as THREE from 'three';
+            import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+            import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xF0ECEA);
+
+            const container = document.getElementById('canvas-container');
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.toneMappingExposure = 10.1;
+            container.appendChild(renderer.domElement);
+            
+            renderer.domElement.style.userSelect = 'none';
+                renderer.domElement.style.WebkitUserSelect = 'none';
+                renderer.domElement.style.MozUserSelect = 'none';
+                renderer.domElement.style.msUserSelect = 'none';
+
+                function preventTextSelection(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                renderer.domElement.addEventListener('selectstart', preventTextSelection);
+                renderer.domElement.addEventListener('dragstart', preventTextSelection);
+
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 4.5);
+            dirLight.position.set(40, 100, 80);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            const keyLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            keyLight.position.set(100, 150, 100);
+            keyLight.castShadow = true;
+            keyLight.shadow.mapSize.width = 2048;
+            keyLight.shadow.mapSize.height = 2048;
+            keyLight.shadow.radius = 2; // Размытие края тени для мягкости
+            scene.add(keyLight);
+
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            fillLight.position.set(-100, 100, -50);
+            fillLight.castShadow = false;
+            scene.add(fillLight);
+
+            const rimLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            rimLight.position.set(-100, 100, -50);
+            rimLight.castShadow = false;
+            scene.add(rimLight);
+
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 5000);
+            camera.position.set(7, 0.55, 0);
+            camera.lookAt(0, 0, 0);
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableZoom = false;
+            controls.update();
+
+            const loader = new GLTFLoader();
+            loader.load(
+                'images/modelka2.glb',
+                function (gltf) {
+                    const model = gltf.scene;
+
+                    const box = new THREE.Box3().setFromObject(model);
+                    const center = box.getCenter(new THREE.Vector3());
+                    model.position.sub(center);
+
+                    scene.add(model);
+                    console.log("Модель загружена с оригинальными материалами!");
+                },
+                undefined,
+                function (error) {
+                    console.error('Ошибка загрузки:', error);
+                }
+            );
+
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            function onResize() {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }
+            window.addEventListener('resize', onResize);
+            onResize();
+    </script>
+    <h3 class="fit">Капсула<br />FIT 3</h3>
+    <p class="forma">Женский комбинезон,<br />принимающий форму<br />любой одежды</p>
+    <h4 class="discription">Описание</h4>
+    <p class="fabric">В основе технологии лежит ткань,<br />
+    способная трансформироваться<br />
+    за счет встроенных микро-<br />
+    серво-приводов толщиной<br />
+    с человеческий волос</p>
+    <h5 class="characteristic">Характеристики</h5>
+    <p class="everything">Размеры — 1.6 х 0.6 х 0.6 м<br />
+    Цвет — небесный голубой<br />
+    Страна производства — Россия<br />
+    Гарантийный срок — 1 год </p>
+    <h6 class="size">Размеры</h6>
+    <div class="sizebuttons-container">
+        <div>
+            <button class="xs">XS</button>
+        </div>
+        <div>
+            <button class="s">S</button>
+        </div>
+        <div>
+            <button class="m">M</button>
+        </div>
+        <div>
+            <button class="l">L</button>
+        </div>
+        <div>
+            <button class="xl">XL</button>
+        </div>
+    </div>
+    <h7 class="price">Цена</h7>
+    <p class="cost">51900₽<br />
+        <div>
+            <button id="buyTrigger" class="buybtn">КУПИТЬ<br />КАПСУЛУ</button>
+        </div>
+    <div class="footerdark">
+        <div class="logofd">
+            <img src="images/logowhite.svg">
+        </div>
+        <div class="maild">
+            <p>capsuleevent@yandex.ru</p>
+        </div>
+        <div class="phoned">
+            <p>+79412324211</p>
+        </div>
+        <div class="adressd">
+            <p>г. Санкт-Петербург, ул. Миллионная, д.1</p>
+        </div>
+    </div>
+    <div id="bluring" class="blur">
+        <div class="circle">
+    
+            <h8 class="formtitle">Заполните все поля<br/> для оформления заказа</h8>
+    
+            <form id="orderform">
+                <div class="input">
+                    <input type="text" id="name" placeholder="ИМЯ" required>
+                </div>
+                <div class="input">
+                    <input type="text" id="address" placeholder="АДРЕС" required>
+                </div>
+                <div class="input">
+                    <input type="tel" id="phone" placeholder="ТЕЛЕФОН" required>
+                </div>
+    
+                <button type="submit" class="submit-btn">КУПИТЬ</button>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+</html>
